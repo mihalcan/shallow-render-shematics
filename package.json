@@ -19,9 +19,7 @@
     "lint": "tslint -p tsconfig.json",
     "clean": "rm -Rf dist",
     "build": "yarn clean && mkdir dist && node scripts/create-package.js && tsc -p tsconfig.json",
-    "check-format": "prettier --check src/**/*.ts scripts/*.js",
-    "format": "prettier --write src/**/*.ts scripts/*.js",
-    "ci": "yarn check-format && yarn lint && yarn build && yarn test"
+    "ci": "yarn lint && yarn build && yarn test"
   },
   "dependencies": {
     "@angular-devkit/core": "^7.3.10",
@@ -32,7 +30,6 @@
     "@types/jest": "23.3.10",
     "@types/node": "^10.17.21",
     "jest": "23.6.0",
-    "prettier": "^2.0.4",
     "ts-jest": "23.10.5",
     "tslint": "^6.1.1",
     "typescript": "~3.1.4"
