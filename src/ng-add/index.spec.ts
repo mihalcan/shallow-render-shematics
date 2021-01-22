@@ -3,21 +3,24 @@ import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { createTestApp, getFileContent } from '../testing';
 import { Schema } from './schema';
 
+import * as path from 'path';
+const collectionPath = path.join(__dirname, '../collection.json');
+
 describe('CDK ng-add', () => {
-  let runner: SchematicTestRunner;
+  let ngRunner: SchematicTestRunner;
   let appTree: Tree;
 
-  beforeEach(async () => {
-    runner = new SchematicTestRunner(
-      'schematics',
-      require.resolve('../collection.json')
+  beforeEach(async () => {    
+    ngRunner = new SchematicTestRunner(
+      '@schematics/angular', 
+      require.resolve('../../node_modules/@schematics/angular/collection.json')
     );
-    appTree = await createTestApp(runner);
+    appTree = await createTestApp(ngRunner);
   });
 
   it('should update the package.json, install package and set default collection to shallow-render-schematics', async () => {
-    const tree = await runner
-      .runSchematicAsync('ng-add', {}, appTree)
+    const tree = await ngRunner
+      .runExternalSchematicAsync(collectionPath, 'ng-add', {}, appTree)
       .toPromise();
 
     const packageJson = JSON.parse(getFileContent(tree, '/package.json'));
@@ -27,7 +30,7 @@ describe('CDK ng-add', () => {
     expect(Object.keys(devDependencies)).toEqual(
       Object.keys(devDependencies).sort()
     );
-    expect(runner.tasks.some((task) => task.name === 'node-package')).toBe(
+    expect(ngRunner.tasks.some((task) => task.name === 'node-package')).toBe(
       true
     );
 
@@ -40,15 +43,15 @@ describe('CDK ng-add', () => {
       setAsDefaultCollection: false,
       skipInstall: true,
     };
-    const tree = await runner
-      .runSchematicAsync('ng-add', options, appTree)
+    const tree = await ngRunner
+      .runExternalSchematicAsync(collectionPath, 'ng-add', options, appTree)
       .toPromise();
 
     const packageJson = JSON.parse(getFileContent(tree, '/package.json'));
     const devDependencies = packageJson.devDependencies;
 
     expect(devDependencies['shallow-render']).toBe('9.0.4');
-    expect(runner.tasks.some((task) => task.name === 'node-package')).toBe(
+    expect(ngRunner.tasks.some((task) => task.name === 'node-package')).toBe(
       false
     );
 

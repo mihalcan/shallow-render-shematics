@@ -33,7 +33,7 @@ cp(
 // Copying template files
 cp('src/component/files', 'dist/component/files');
 
-// read oryginal package .json
+// read original package .json
 const pkgJson = require('../package.json');
 
 const targetPkgJson = {};
@@ -53,7 +53,7 @@ const targetPkgJson = {};
   targetPkgJson[field] = pkgJson[field];
 });
 
-// add dependencies (use the same versions as in the oryginal package.json)
+// add dependencies (use the same versions as in the original package.json)
 targetPkgJson.dependencies = {};
 [
   '@angular-devkit/core',

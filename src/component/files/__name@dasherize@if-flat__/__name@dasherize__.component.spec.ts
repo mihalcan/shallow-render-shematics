@@ -10,7 +10,7 @@ describe('<%= classify(name) %>Component', () => {
   });
 
   it('should create', async () => {
-    const { find } = await shallow.render('<<%= dasherize(name) %>></<%= dasherize(name) %>>');
+    const { find } = await shallow.render('<<%= selector %>></<%= selector %>>');
     expect(find('p')).toHaveFound(1);
   });
 });

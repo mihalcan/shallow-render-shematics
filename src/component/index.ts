@@ -1,5 +1,5 @@
 // tslint:disable:linebreak-style
-import { Path, strings } from '@angular-devkit/core';
+import { JsonObject, Path, strings } from '@angular-devkit/core';
 import {
   apply,
   chain,
@@ -14,13 +14,9 @@ import {
   url,
 } from '@angular-devkit/schematics';
 import { Schema as ShallowComponentOptions } from '@schematics/angular/component/schema';
-import { getWorkspace } from '@schematics/angular/utility/config';
+import { getWorkspace, buildDefaultPath } from '@schematics/angular/utility/workspace';
 import * as findModule from '@schematics/angular/utility/find-module';
 import { parseName } from '@schematics/angular/utility/parse-name';
-import {
-  buildDefaultPath,
-  getProject,
-} from '@schematics/angular/utility/project';
 
 interface ModuleDetails {
   moduleName: string;
@@ -34,24 +30,23 @@ export const defaultModuleDetails: ModuleDetails = {
 
 // tslint:disable-next-line:no-default-export
 export default function (options: ShallowComponentOptions): Rule {
-  return (host: Tree, context: SchematicContext) => {
+  return async (host: Tree, context: SchematicContext) => {
     // no reason to continue if spec file is not required
-    if (!options.spec) {
+    if (options.skipTests) {
       return externalSchematic('@schematics/angular', 'component', options);
     }
+    
+    const workspace = await getWorkspace(host);    
+    const project = workspace.projects.get(options.project as string);
 
-    if (options.path === undefined) {
-      const workspace = getWorkspace(host);
-      const projectName = options.project
-        ? options.project
-        : Object.keys(workspace.projects)[0];
-      const project = getProject(host, projectName);
+    if (options.path === undefined && project) {
       options.path = buildDefaultPath(project);
     }
 
-    const parsedPath = parseName(options.path, options.name);
+    const parsedPath = parseName(options.path as string, options.name);
     options.name = parsedPath.name;
     options.path = parsedPath.path;
+    options.selector = options.selector || buildSelector(options, project && project.prefix || '');
 
     const moduleDetails = options.skipImport
       ? defaultModuleDetails
@@ -66,16 +61,20 @@ export default function (options: ShallowComponentOptions): Rule {
       }),
       move(parsedPath.path),
     ]);
+    
+    const angularComponentOptions = { 
+      ...options, 
+      ...getAngularComponentExtensions(workspace.extensions),
+      ...getAngularComponentExtensions(project?.extensions)
+    };
 
-    const rule = chain([
+    return chain([
       externalSchematic('@schematics/angular', 'component', {
-        ...options,
-        spec: false,
+        ...angularComponentOptions,
+        skipTests: true
       }),
       mergeWith(templateSource, MergeStrategy.Default),
     ]);
-
-    return rule(host, context);
   };
 }
 
@@ -93,15 +92,28 @@ function getModuleDetails(
   const relativePath = findModule.buildRelativePath(componentPath, modulePath);
   const moduleFileName = modulePath.split('/').pop() as string;
 
-  const suffixLength = '.module.ts'.length;
-  const moduleName = moduleFileName.slice(
-    0,
-    moduleFileName.length - suffixLength
-  );
-  const moduleRelativePath = relativePath.slice(
-    0,
-    relativePath.length - suffixLength
-  );
+  const moduleName = moduleFileName.replace('.module.ts', '')
+  const moduleRelativePath = relativePath.replace('.module.ts', '');
 
   return { relativePath: moduleRelativePath, moduleName };
+}
+
+function getAngularComponentExtensions(extensions: any) {
+  if (extensions?.schematics && extensions.schematics['@schematics/angular:component'])
+  {
+    return extensions.schematics['@schematics/angular:component']
+  }
+
+  return {};
+}
+
+function buildSelector(options: ShallowComponentOptions, projectPrefix: string) {
+  let selector = strings.dasherize(options.name);
+  if (options.prefix) {
+    selector = `${options.prefix}-${selector}`;
+  } else if (options.prefix === undefined && projectPrefix) {
+    selector = `${projectPrefix}-${selector}`;
+  }
+
+  return selector;
 }

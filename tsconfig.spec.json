@@ -7,6 +7,6 @@
     "types": ["jest", "node"],
     "strictNullChecks": false
   },
-  "include": ["**/*.spec.ts"],
+  "include": ["./src/**/*.spec.ts"],
   "exclude": ["./src/**/files/**/*"]
 }

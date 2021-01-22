@@ -10,10 +10,13 @@ import { addPackageToPackageJson } from './package-config';
 import { Schema as NgAddOptions } from './schema';
 import { updateJsonInTree } from './utils';
 
+const SHALLOW_RENDER_VERSION = '11.0.0';
+const SCHEMATICS_VERSION = '1.0.0';
+
 function addShallowRenderDependency() {
   return (host: Tree, _: SchematicContext) => {
-    addPackageToPackageJson(host, 'shallow-render', '9.0.4');
-    addPackageToPackageJson(host, 'shallow-render-schematics', '1.0.0');
+    addPackageToPackageJson(host, 'shallow-render', SHALLOW_RENDER_VERSION);
+    addPackageToPackageJson(host, 'shallow-render-schematics', SCHEMATICS_VERSION);
   };
 }
 

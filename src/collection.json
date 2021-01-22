@@ -4,7 +4,7 @@
   "schematics": {
     "component": {
       "aliases": ["c"],
-      "description": "Creates a component with a shallow-render template",
+      "description": "Creates a component with a shallow-render spec template",
       "factory": "./component",
       "schema": "./component/schema.json"
     },

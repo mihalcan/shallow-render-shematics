@@ -13,8 +13,9 @@
       },
       "setAsDefaultCollection": {
         "type": "boolean",
-        "description": "Sets shallow-render schematics as default. It allows to use cli 'ng generate component' command without specifying collection",
-        "default": true
+        "description": "Sets shallow-render schematics as default",
+        "default": true,
+        "x-prompt": "Would you like to set shallow-render schematics as default (allows to use 'ng generate component' and 'ng g c' without specifying collection)?"
       }
     },
     "required": [],
