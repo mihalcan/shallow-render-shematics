@@ -1,12 +1,13 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { createTestApp, getFileContent } from '../testing';
-import { Schema } from './schema';
-
+import { Schema as NgAddOptions } from './schema';
+import * as utils from './utils';
 import * as path from 'path';
+
 const collectionPath = path.join(__dirname, '../collection.json');
 
-describe('CDK ng-add', () => {
+describe('ng-add', () => {
   let ngRunner: SchematicTestRunner;
   let appTree: Tree;
 
@@ -18,7 +19,12 @@ describe('CDK ng-add', () => {
     appTree = await createTestApp(ngRunner);
   });
 
-  it('should update the package.json, install package and set default collection to shallow-render-schematics', async () => {
+  it('should latest shallow-render and schematics version to package.json, install package and set cli collection to shallow-render-schematics by default', async () => {
+    jest.spyOn(utils, 'getLatestNodeVersion')
+      .mockResolvedValueOnce({ name: 'shallow-render', version: 'test-v1' });
+    jest.spyOn(utils, 'getCurrentPackageVersion')
+      .mockReturnValue({ name: 'shallow-render-schematics', version: '1.0.0-test' });
+
     const tree = await ngRunner
       .runExternalSchematicAsync(collectionPath, 'ng-add', {}, appTree)
       .toPromise();
@@ -26,7 +32,9 @@ describe('CDK ng-add', () => {
     const packageJson = JSON.parse(getFileContent(tree, '/package.json'));
     const devDependencies = packageJson.devDependencies;
 
-    expect(devDependencies['shallow-render']).toBe('9.0.4');
+    expect(devDependencies['shallow-render']).toBe('test-v1');
+    expect(devDependencies['shallow-render-schematics']).toBe('1.0.0-test');
+
     expect(Object.keys(devDependencies)).toEqual(
       Object.keys(devDependencies).sort()
     );
@@ -38,11 +46,16 @@ describe('CDK ng-add', () => {
     expect(angularJson.cli.defaultCollection).toBe('shallow-render-schematics');
   });
 
-  it('should only update package.json when other options are deselected', async () => {
-    const options: Schema = {
+  it('should add specified shallow-render version', async () => {
+    const options: NgAddOptions = {
       setAsDefaultCollection: false,
+      shallowRenderVersion: '9.2.0',
       skipInstall: true,
     };
+
+    jest.spyOn(utils, 'getCurrentPackageVersion')
+      .mockReturnValue({ name: 'shallow-render-schematics', version: '1.0.0-test' });
+
     const tree = await ngRunner
       .runExternalSchematicAsync(collectionPath, 'ng-add', options, appTree)
       .toPromise();
@@ -50,7 +63,18 @@ describe('CDK ng-add', () => {
     const packageJson = JSON.parse(getFileContent(tree, '/package.json'));
     const devDependencies = packageJson.devDependencies;
 
-    expect(devDependencies['shallow-render']).toBe('9.0.4');
+    expect(devDependencies['shallow-render']).toBe(options.shallowRenderVersion);
+  });
+
+  it('should only update package.json when skipInstall=true and setAsDefaultCollection=false', async () => {
+    const options: NgAddOptions = {
+      setAsDefaultCollection: false,
+      skipInstall: true,
+    };
+    const tree = await ngRunner
+      .runExternalSchematicAsync(collectionPath, 'ng-add', options, appTree)
+      .toPromise();
+
     expect(ngRunner.tasks.some((task) => task.name === 'node-package')).toBe(
       false
     );

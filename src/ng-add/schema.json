@@ -11,11 +11,16 @@
         "description": "Skip installing after adding shallow-render dependency",
         "default": false
       },
+      "shallowRenderVersion": {
+        "type": "string",
+        "description": "Shallow-render version to install",
+        "default": null,
+        "x-prompt": "Please provide shallow-render version to install or hit Enter to install the latest:"
+      },
       "setAsDefaultCollection": {
         "type": "boolean",
         "description": "Sets shallow-render schematics as default",
-        "default": true,
-        "x-prompt": "Would you like to set shallow-render schematics as default (allows to use 'ng generate component' and 'ng g c' without specifying collection)?"
+        "default": true        
       }
     },
     "required": [],

@@ -6,17 +6,29 @@ import {
   Tree,
 } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
+import { version } from 'process';
 import { addPackageToPackageJson } from './package-config';
 import { Schema as NgAddOptions } from './schema';
-import { updateJsonInTree } from './utils';
+import { getLatestNodeVersion, getCurrentPackageVersion, updateJsonInTree } from './utils';
 
-const SHALLOW_RENDER_VERSION = '11.0.0';
-const SCHEMATICS_VERSION = '1.0.0';
+const DEFAULT_SHALLOW_RENDER_VERSION = '11.0.0';
 
-function addShallowRenderDependency() {
-  return (host: Tree, _: SchematicContext) => {
-    addPackageToPackageJson(host, 'shallow-render', SHALLOW_RENDER_VERSION);
-    addPackageToPackageJson(host, 'shallow-render-schematics', SCHEMATICS_VERSION);
+function addShallowRenderDependency(options: NgAddOptions) {
+  return async (host: Tree, ctx: SchematicContext) => {
+    let versionToInstall: string;
+
+    if (!options.shallowRenderVersion) {
+      const { version } = await getLatestNodeVersion('shallow-render', DEFAULT_SHALLOW_RENDER_VERSION);
+      versionToInstall = version;
+    } else {
+      versionToInstall = options.shallowRenderVersion;
+    }
+    ctx.logger.info(`Adding shallow-render@${versionToInstall} to package.json`);
+    addPackageToPackageJson(host, 'shallow-render', versionToInstall);
+
+    const schematicsPackage = getCurrentPackageVersion();
+    ctx.logger.info(`Adding ${schematicsPackage.name}@${schematicsPackage.version} to package.json`);
+    addPackageToPackageJson(host, schematicsPackage.name, schematicsPackage.version);
   };
 }
 
@@ -47,7 +59,7 @@ function addInstallTask(options: NgAddOptions) {
 // tslint:disable-next-line:no-default-export
 export default function (options: NgAddOptions): Rule {
   return chain([
-    addShallowRenderDependency(),
+    addShallowRenderDependency(options),
     setDefaultCollection(options),
     addInstallTask(options),
   ]);

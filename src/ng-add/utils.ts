@@ -1,10 +1,20 @@
 import * as fs from 'fs';
 import { Tree, Rule } from '@angular-devkit/schematics';
+import { get } from 'http';
+import * as path from 'path';
 
-export function getLibraryVersion() {
-    return JSON.parse(
-        fs.readFileSync('./package.json', 'utf8')
-    ).version;
+export interface NodePackage {
+    name: string;
+    version: string;
+  }
+
+export function getCurrentPackageVersion(): NodePackage {
+    const packagePath = path.join(__dirname, '../package.json');
+    const packageJson =  JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+    return {
+        name: packageJson.name,
+        version: packageJson.version
+    };
 }
 
 export function readJsonInTree(host: Tree, filePath: string) {
@@ -26,3 +36,26 @@ export function updateJsonInTree(
         return host;
     };
 }
+
+export function getLatestNodeVersion(packageName: string, defaultVersion: string): Promise<NodePackage> {
+    return new Promise((resolve) => {
+      return get(`http://registry.npmjs.org/${packageName}`, (res) => {
+        let rawData = '';
+        res.on('data', (chunk) => (rawData += chunk));
+        res.on('end', () => {
+          try {
+            const response = JSON.parse(rawData);
+            const version = (response && response['dist-tags']) || {};
+  
+            resolve(buildPackage(packageName, version.latest));
+          } catch (e) {
+            resolve(buildPackage(packageName));
+          }
+        });
+      }).on('error', () => resolve(buildPackage(packageName)));
+    });
+  
+    function buildPackage(name: string, version: string = defaultVersion): NodePackage {
+      return { name, version };
+    }
+  }
