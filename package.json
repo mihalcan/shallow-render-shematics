@@ -1,7 +1,7 @@
 {
-  "name": "shallow-render-schematics",
-  "version": "1.0.0",
-  "description": "shallow-render schematics collection for angular-cli",
+  "name": "@mihalcan/shallow-render-schematics",
+  "version": "0.0.1-beta.1",
+  "description": "Add shallow-render to an Angular CLI project",
   "engines": {
     "node": ">=12.10"
   },
@@ -9,10 +9,18 @@
     "type": "git",
     "url": "git+https://github.com/mihalcan/shallow-render-shematics.git"
   },
+  "bugs": {
+    "url": "https://github.com/mihalcan/shallow-render-shematics/issues"
+  },
+  "homepage": "https://github.com/mihalcan/shallow-render-shematics#readme",
+  "author": "Andrei Mihalciuc",
+  "main": "index.js",
   "license": "MIT",
   "keywords": [
     "angular",
-    "shallow-render"
+    "shallow-render",
+    "schematics",
+    "testing"
   ],
   "scripts": {
     "test": "jest",

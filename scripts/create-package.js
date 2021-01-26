@@ -33,6 +33,9 @@ cp(
 // Copying template files
 cp('src/component/files', 'dist/component/files');
 
+// copying misc files
+cp('README.md', 'dist/README.md');
+
 // read original package .json
 const pkgJson = require('../package.json');
 

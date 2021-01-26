@@ -23,7 +23,7 @@ describe('ng-add', () => {
     jest.spyOn(utils, 'getLatestNodeVersion')
       .mockResolvedValueOnce({ name: 'shallow-render', version: 'test-v1' });
     jest.spyOn(utils, 'getCurrentPackageVersion')
-      .mockReturnValue({ name: 'shallow-render-schematics', version: '1.0.0-test' });
+      .mockReturnValue({ name: '@mihalcan/shallow-render-schematics', version: '1.0.0-test' });
 
     const tree = await ngRunner
       .runExternalSchematicAsync(collectionPath, 'ng-add', {}, appTree)
@@ -33,7 +33,7 @@ describe('ng-add', () => {
     const devDependencies = packageJson.devDependencies;
 
     expect(devDependencies['shallow-render']).toBe('test-v1');
-    expect(devDependencies['shallow-render-schematics']).toBe('1.0.0-test');
+    expect(devDependencies['@mihalcan/shallow-render-schematics']).toBe('1.0.0-test');
 
     expect(Object.keys(devDependencies)).toEqual(
       Object.keys(devDependencies).sort()
@@ -43,7 +43,7 @@ describe('ng-add', () => {
     );
 
     const angularJson = JSON.parse(getFileContent(tree, '/angular.json'));
-    expect(angularJson.cli.defaultCollection).toBe('shallow-render-schematics');
+    expect(angularJson.cli.defaultCollection).toBe('@mihalcan/shallow-render-schematics');
   });
 
   it('should add specified shallow-render version', async () => {
@@ -54,7 +54,7 @@ describe('ng-add', () => {
     };
 
     jest.spyOn(utils, 'getCurrentPackageVersion')
-      .mockReturnValue({ name: 'shallow-render-schematics', version: '1.0.0-test' });
+      .mockReturnValue({ name: '@mihalcan/shallow-render-schematics', version: '1.0.0-test' });
 
     const tree = await ngRunner
       .runExternalSchematicAsync(collectionPath, 'ng-add', options, appTree)

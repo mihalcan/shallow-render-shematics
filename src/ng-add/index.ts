@@ -37,7 +37,7 @@ function setDefaultCollection(options: NgAddOptions) {
     return updateJsonInTree('angular.json', (angularJson) => ({
       ...angularJson,
       cli: {
-        defaultCollection: 'shallow-render-schematics',
+        defaultCollection: '@mihalcan/shallow-render-schematics',
       },
     }));
   }
