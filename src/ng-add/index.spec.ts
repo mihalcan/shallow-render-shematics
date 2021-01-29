@@ -20,7 +20,7 @@ describe('ng-add', () => {
   });
 
   it('should latest shallow-render and schematics version to package.json, install package and set cli collection to shallow-render-schematics by default', async () => {
-    jest.spyOn(utils, 'getLatestNodeVersion')
+    jest.spyOn(utils, 'getLatestNpmVersion')
       .mockResolvedValueOnce({ name: 'shallow-render', version: 'test-v1' });
     jest.spyOn(utils, 'getCurrentPackageVersion')
       .mockReturnValue({ name: '@mihalcan/shallow-render-schematics', version: '1.0.0-test' });

@@ -44,36 +44,42 @@ export default function (options: ShallowComponentOptions): Rule {
     }
 
     const parsedPath = parseName(options.path as string, options.name);
-    options.name = parsedPath.name;
-    options.path = parsedPath.path;
+    options.name = parsedPath.name; // component name
+    options.path = parsedPath.path; // component path
+    // component selector
     options.selector = options.selector || buildSelector(options, project && project.prefix || '');
 
     const moduleDetails = options.skipImport
       ? defaultModuleDetails
       : getModuleDetails(options, host);
 
-    const templateSource = apply(url('./files'), [
+    const specFileTemplateSource = apply(url('./files'), [
+      // add template functions and variables
       template({
-        ...strings,
-        'if-flat': (s: string) => (options.flat ? '' : s),
-        ...options,
-        ...moduleDetails,
+        ...strings, // provide template functions such as classify and dasherize
+        'if-flat': (s: string) => (options.flat ? '' : s), // create component folder or not
+        ...options, // provide component variables (name, selector)
+        ...moduleDetails, // provide module variables (moduleName, relativePath)
       }),
-      move(parsedPath.path),
+      move(parsedPath.path)
     ]);
     
     const angularComponentOptions = { 
       ...options, 
+      // find default workspace setting 
       ...getAngularComponentExtensions(workspace.extensions),
+      // find default project setting 
       ...getAngularComponentExtensions(project?.extensions)
     };
 
     return chain([
+      // create angular component without spec files
       externalSchematic('@schematics/angular', 'component', {
         ...angularComponentOptions,
         skipTests: true
       }),
-      mergeWith(templateSource, MergeStrategy.Default),
+      // add shallow-render spec file
+      mergeWith(specFileTemplateSource, MergeStrategy.Default),
     ]);
   };
 }
@@ -84,11 +90,10 @@ function getModuleDetails(
 ): ModuleDetails {
   const modulePath = findModule.findModuleFromOptions(host, options) as Path;
   // tslint:disable-next-line:prefer-template
-  const componentPath =
-    `/${options.path}/` +
-    (options.flat ? '' : strings.dasherize(options.name) + '/') +
-    strings.dasherize(options.name) +
-    '.component';
+  const componentPath = `/${options.path}/` 
+    + (options.flat ? '' : strings.dasherize(options.name) + '/') 
+    + strings.dasherize(options.name) 
+    + '.component';
   const relativePath = findModule.buildRelativePath(componentPath, modulePath);
   const moduleFileName = modulePath.split('/').pop() as string;
 
@@ -98,6 +103,14 @@ function getModuleDetails(
   return { relativePath: moduleRelativePath, moduleName };
 }
 
+
+/**
+ * Get default angular schematics options from angular.json file.
+ * E.g. default ChangeDetection or styles file extension `.scss`
+ *
+ * @param {*} extensions
+ * @returns
+ */
 function getAngularComponentExtensions(extensions: any) {
   if (extensions?.schematics && extensions.schematics['@schematics/angular:component'])
   {
@@ -109,7 +122,7 @@ function getAngularComponentExtensions(extensions: any) {
 
 function buildSelector(options: ShallowComponentOptions, projectPrefix: string) {
   let selector = strings.dasherize(options.name);
-  if (options.prefix) {
+  if (options.prefix) { // use prefix from options if provided
     selector = `${options.prefix}-${selector}`;
   } else if (options.prefix === undefined && projectPrefix) {
     selector = `${projectPrefix}-${selector}`;

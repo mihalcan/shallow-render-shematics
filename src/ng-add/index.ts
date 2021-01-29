@@ -9,7 +9,7 @@ import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import { version } from 'process';
 import { addPackageToPackageJson } from './package-config';
 import { Schema as NgAddOptions } from './schema';
-import { getLatestNodeVersion, getCurrentPackageVersion, updateJsonInTree } from './utils';
+import { getLatestNpmVersion, getCurrentPackageVersion, updateJsonInTree } from './utils';
 
 const DEFAULT_SHALLOW_RENDER_VERSION = '11.0.0';
 
@@ -18,7 +18,7 @@ function addShallowRenderDependency(options: NgAddOptions) {
     let versionToInstall: string;
 
     if (!options.shallowRenderVersion) {
-      const { version } = await getLatestNodeVersion('shallow-render', DEFAULT_SHALLOW_RENDER_VERSION);
+      const { version } = await getLatestNpmVersion('shallow-render', DEFAULT_SHALLOW_RENDER_VERSION);
       versionToInstall = version;
     } else {
       versionToInstall = options.shallowRenderVersion;
@@ -32,6 +32,7 @@ function addShallowRenderDependency(options: NgAddOptions) {
   };
 }
 
+// use shallow-render-schematics instead of Angular
 function setDefaultCollection(options: NgAddOptions) {
   if (options.setAsDefaultCollection) {
     return updateJsonInTree('angular.json', (angularJson) => ({

@@ -37,7 +37,7 @@ export function updateJsonInTree(
     };
 }
 
-export function getLatestNodeVersion(packageName: string, defaultVersion: string): Promise<NodePackage> {
+export function getLatestNpmVersion(packageName: string, defaultVersion: string): Promise<NodePackage> {
     return new Promise((resolve) => {
       return get(`http://registry.npmjs.org/${packageName}`, (res) => {
         let rawData = '';
